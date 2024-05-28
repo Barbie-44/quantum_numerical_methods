@@ -14,11 +14,7 @@ class Spacing:
         return [random.uniform(0, end) for number in range(N)]
 
 
-class PolynomialInterpolation(Spacing):
-    """
-    Description:
-        This class inherits from Spacing class in order to stablish a regular or random spacing.
-    """
+class Coordinates(Spacing):
 
     def __init__(self):
         self.function = None
@@ -51,6 +47,15 @@ class PolynomialInterpolation(Spacing):
             self.x_coordinates, self.function
         )
 
+
+class PolynomialInterpolation(Coordinates):
+    """
+    Description:
+        This class inherits from Spacing class in order to stablish a regular or random spacing.
+    Pain Points:
+        For n=32 points function behavior is strange.
+    """
+
     def set_polinomic_base(self, x, i, x_coordinates):
         l_i = 1
         for j in range(len(x_coordinates)):
@@ -64,25 +69,58 @@ class PolynomialInterpolation(Spacing):
         for i in range(len(x_coordinates)):
             L_i = self.set_polinomic_base(x_symbol, i, self.x_coordinates)
             polynomyal += y_coordinates[i] * L_i
-        print(simplify(polynomyal))
-        print(simplify(polynomyal).coeff(x_symbol, 2))
+        print("POLYNOMIAL: ", simplify(polynomyal))
         return simplify(polynomyal)
 
     def plot_final_polynomial(self):
         x = symbols("x")
         lagrange_polynomial = self.set_final_polynomial(x)
-        print(type(lagrange_polynomial))
-        coefficients = [
-            simplify(lagrange_polynomial).coeff(x, i)
-            for i in range(len(self.x_coordinates))
-        ]
-        print(coefficients)
-        plt.plot(coefficients)
+        f_xs = [lagrange_polynomial.subs(x, i) for i in self.x_coordinates]
+        print("X's: ", self.x_coordinates)
+        print("F(x)'s: ", f_xs)
+        plt.plot(self.x_coordinates, f_xs)
         plt.show()
 
 
-# class SectionalAdjustmen(Spacing): ...
+class LinearSpline(Coordinates):
+    """The goal of this class is to create a polynomial of first degree"""
 
+    def get_linear_spline(self):
+        x_coordinates, y_coordinates = self.set_coordinates(self.end)
+        final_x_coordinates = []
+        final_y_coordinates = []
+        for i in range(len(x_coordinates) - 1):
+            middle_x_distance = (
+                (x_coordinates[i + 1] - x_coordinates[i]) / 2
+            ) + x_coordinates[i]
+            print("middle_x_distance: ", middle_x_distance)
+            f_x = y_coordinates[i] + (
+                (y_coordinates[i + 1] - y_coordinates[i]) / x_coordinates[i + 1]
+                - x_coordinates[i]
+            ) * (middle_x_distance - x_coordinates[i])
+            final_x_coordinates.extend([x_coordinates[i], middle_x_distance])
+            final_y_coordinates.extend([y_coordinates[i], f_x])
+        print("X'S: ", final_x_coordinates)
+        print("Y's: ", final_y_coordinates)
+        return final_x_coordinates, final_y_coordinates
+
+    def plot_linear_spline(self):
+        x_array, y_array = self.get_linear_spline()
+        plt.plot(x_array, y_array)
+        plt.show()
+
+
+# exercise_a = LinearSpline()
+# exercise_a.function = "a"
+# exercise_a.number_of_points = 32
+# exercise_a.end = np.pi
+# exercise_a.plot_linear_spline()
+
+# class QuadraticSpline(Spacing):
+#     pass
+
+# class CubicSpline(Spacing):
+#     pass
 
 # class LeastSquares(Spacing): ...
 
