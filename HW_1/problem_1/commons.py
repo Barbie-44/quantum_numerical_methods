@@ -18,6 +18,7 @@ class Coordinates(Spacing):
         self.number_of_points = None
         self.end = None
         self.x_coordinates = None
+        self.regular_spacing = True
 
     def get_normalized_x_coordinates(self, x_coordinates, requires_normalization):
         if requires_normalization:
@@ -34,6 +35,7 @@ class Coordinates(Spacing):
 
     def get_y_coordinates(self, coordinates, function):
         y_coordinates = []
+        print("COORDINATES: ", coordinates)
         for x in coordinates:
             print("X: ", x)
             if function == "a":
@@ -44,11 +46,12 @@ class Coordinates(Spacing):
         print(y_coordinates)
         return y_coordinates
 
-    def set_coordinates(self, end, regular_spacing=True, requires_normalization=False):
-        if regular_spacing:
+    def set_coordinates(self, end, requires_normalization=False):
+        if self.regular_spacing:
             self.x_coordinates = self.set_regular_spacing(self.number_of_points, end)
         else:
             self.x_coordinates = self.set_random_spacing(self.number_of_points, end)
+            self.x_coordinates.sort()
         # self.get_normalized_x_coordinates(self.x_coordinates, requires_normalization)
         print("X_COORDINATES: ", self.x_coordinates)
         return self.x_coordinates, self.get_y_coordinates(
