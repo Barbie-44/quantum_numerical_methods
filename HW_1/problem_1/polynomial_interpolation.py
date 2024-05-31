@@ -38,8 +38,6 @@ class PolynomialInterpolation(Coordinates):
         plt.show()
 
 
-# class LeastSquares(Spacing): ...
-
 exercise_a = PolynomialInterpolation()
 exercise_a.function = "a"
 exercise_a.number_of_points = 32
