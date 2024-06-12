@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import pandas as pd
+from scipy.sparse.linalg import eigsh
 
 
 class ExactDiagonalization:
@@ -19,15 +20,13 @@ class ExactDiagonalization:
     def __init__(self):
         self.M_sites = None
         self.N_particles = None
+        self.T_tags = None
+        self.ind = None
+        self.T_sorted = None
+        self.J = 1
+        self.U = 1
 
     def get_arr_dimension(self):
-        print(
-            "dIMENTION: ",
-            (
-                math.factorial(self.N_particles + self.M_sites - 1)
-                / (math.factorial(self.N_particles) * math.factorial(self.M_sites - 1))
-            ),
-        )
         return math.factorial(self.N_particles + self.M_sites - 1) / (
             math.factorial(self.N_particles) * math.factorial(self.M_sites - 1)
         )
@@ -76,60 +75,92 @@ class ExactDiagonalization:
 
     def get_T_value(self, v_numbers):
         curr_sum = 0
-        for i in range(len(v_numbers)):
+        for i in range(1, len(v_numbers) + 1):
             pi = np.sqrt(100 * i + 3)
-            curr_sum += pi * v_numbers[i]
+            curr_sum += pi * v_numbers[i - 1]
         return curr_sum
 
     def assign_functional_tag(self):
         basis_arr = self.get_basis_vectors_array()
-        print(basis_arr)
-        print("*" * 10)
         counter = 0
         T_tags = {}
         while counter < self.get_arr_dimension():
             curr_sum = 0
             for i in range(1, self.M_sites + 1):
-                print("i: ", i)
                 pi = np.sqrt(100 * i + 3)
                 curr_sum += pi * basis_arr.iloc[counter].loc[f"n{i}"]
-                print("basis arra_i: ", basis_arr.iloc[counter].loc[f"n{i}"])
-                print("CURRENT SUM: ", curr_sum)
 
-            T_tags[f"v{counter+1}"] = curr_sum
+            T_tags[counter + 1] = curr_sum
             counter += 1
-        T_series = pd.Series(T_tags)
-        TSorted = T_series.sort_values(ascending=True)
-        print(TSorted)
+        self.T_tags = pd.Series(T_tags)
+        self.ind = self.T_tags.index
+        self.T_sorted = self.T_tags.sort_values(ascending=True)
 
-    def diagonalize_H_kin(self):
+    def hopping_term(self, state, i, j, t):
         """
-        This function diagonalize the kinetic term of Bose-Hubbard Hamiltonian column by column given a set of N v-vectors.
+        Compute the hopping term between two basis states.
         """
-        a_dagger_operator = []
-        for i in range(self.M_sites):
-            curr_row = [0 for entry in range(self.M_sites)]
-            if i != 0:
-                curr_row[i - 1] = np.sqrt(i)
-            a_dagger_operator.append(curr_row)
-        a_dagger_operator = np.array(a_dagger_operator)
-        a_operator = a_dagger_operator.T
-        print(a_dagger_operator)
-        print("TRANSPOSE: ", np.transpose(np.array([2, 1, 0])))
-        print("A*v: ", np.matmul(a_operator, np.transpose(np.array([2, 1, 0]))))
-        v_components = list(
-            np.matmul(a_dagger_operator, np.matmul(a_operator, np.array([2, 1, 0]).T))
-        )
-        for site in range(1, self.M_sites + 1):
-            v_sqrt = np.sqrt(v_components)
-        print(self.assign_functional_tag())
+        state_copy = state.copy()
+        value = None
+        if i != j and state[j] != 0:
+            state_copy.iloc[j] = state.iloc[j] - 1
+            state_copy.iloc[i] = state.iloc[i] + 1
+            value = np.sqrt((state.iloc[i] + 1) * state.iloc[j])
+        return value, state_copy
 
-        print("v_COMPONENTS: ", v_components)
-        v_tag = self.get_T_value(v_components)
-        print("V_TAG: ", v_tag)
+    def get_H_kin(self):
+        """
+        This function gets the kinetic term of Bose-Hubbard Hamiltonian column by column given a set of N v-vectors.
+        """
+        basis_states = self.get_basis_vectors_array()
+        self.assign_functional_tag()
+        D = int(self.get_arr_dimension())
+        H_k = np.zeros((D, D))
+        for index, state in basis_states.iterrows():
+            for i in range(self.M_sites):
+                for j in range(self.M_sites):
+                    value, v_state = self.hopping_term(state, i, j, self.J)
+                    if not state.equals(v_state):
+                        Tr = self.get_T_value(v_state)
+                        basis_v = self.T_tags.where(self.T_tags == Tr).dropna()
+                        u_position = basis_v.index.tolist()[0]
+                        H_k[u_position - 1][index - 1] = value
+        return H_k
+
+    def get_H_int(self):
+        """
+        This function deduces the interaction term of the Bose-Hubbard Hamiltonian
+        """
+        basis_states = self.get_basis_vectors_array()
+        D = int(self.get_arr_dimension())
+        H_int = np.zeros((D, D))
+        for index, state in basis_states.iterrows():
+            sum_of_part_in_state = 0
+            for i in range(self.M_sites):
+                ni = state.iloc[i]
+                if ni == 0:
+                    continue
+                sum_of_part_in_state += ni * (ni - 1)
+            H_int[index - 1][index - 1] = sum_of_part_in_state
+        return H_int
+
+    def get_total_H(self):
+        H_kin = self.get_H_kin()
+        H_int = self.get_H_int()
+        H_total = np.add(H_kin, H_int)
+        print(H_total)
+        return H_total
+
+    def get_eigenv(self):
+        H = self.get_total_H()
+        ground_value, ground_state = eigsh(H, k=1)
+        ground_value = ground_value[0]
+        ground_state = ground_state.reshape(-1)
+        print("EIGENVALUE: ", ground_value)
+        print("PSI: ", ground_state)
 
 
 x = ExactDiagonalization()
 x.M_sites = 3
 x.N_particles = 3
-x.diagonalize_H_kin()
+x.get_eigenv()
