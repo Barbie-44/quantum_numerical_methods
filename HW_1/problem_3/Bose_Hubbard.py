@@ -2,6 +2,7 @@ import math
 import numpy as np
 import pandas as pd
 from scipy.sparse.linalg import eigsh
+import matplotlib.pyplot as plt
 
 
 class ExactDiagonalization:
@@ -23,8 +24,8 @@ class ExactDiagonalization:
         self.T_tags = None
         self.ind = None
         self.T_sorted = None
-        self.J = 1
-        self.U = 1
+        self.J = None
+        self.U = 20
 
     def get_arr_dimension(self):
         return math.factorial(self.N_particles + self.M_sites - 1) / (
@@ -96,7 +97,7 @@ class ExactDiagonalization:
         self.ind = self.T_tags.index
         self.T_sorted = self.T_tags.sort_values(ascending=True)
 
-    def hopping_term(self, state, i, j, t):
+    def hopping_term(self, state, i, j):
         """
         Compute the hopping term between two basis states.
         """
@@ -105,7 +106,7 @@ class ExactDiagonalization:
         if i != j and state[j] != 0:
             state_copy.iloc[j] = state.iloc[j] - 1
             state_copy.iloc[i] = state.iloc[i] + 1
-            value = np.sqrt((state.iloc[i] + 1) * state.iloc[j])
+            value = (-1) * self.J * (np.sqrt((state.iloc[i] + 1) * state.iloc[j]))
         return value, state_copy
 
     def get_H_kin(self):
@@ -119,7 +120,7 @@ class ExactDiagonalization:
         for index, state in basis_states.iterrows():
             for i in range(self.M_sites):
                 for j in range(self.M_sites):
-                    value, v_state = self.hopping_term(state, i, j, self.J)
+                    value, v_state = self.hopping_term(state, i, j)
                     if not state.equals(v_state):
                         Tr = self.get_T_value(v_state)
                         basis_v = self.T_tags.where(self.T_tags == Tr).dropna()
@@ -141,7 +142,7 @@ class ExactDiagonalization:
                 if ni == 0:
                     continue
                 sum_of_part_in_state += ni * (ni - 1)
-            H_int[index - 1][index - 1] = sum_of_part_in_state
+            H_int[index - 1][index - 1] = (self.U / 2) * sum_of_part_in_state
         return H_int
 
     def get_total_H(self):
@@ -158,9 +159,30 @@ class ExactDiagonalization:
         ground_state = ground_state.reshape(-1)
         print("EIGENVALUE: ", ground_value)
         print("PSI: ", ground_state)
+        return ground_value, ground_state
+
+    def get_fluctuation_on_site(self):
+        g_value, g_state = self.get_eigenv()
+        a = np.diag(np.sqrt(np.arange(1, len(g_state))), 1)
+        a_dagger = a.T
+        N = np.dot(a_dagger, a)
+        expectation_value_N = np.dot(np.conj(g_state), np.dot(N, g_state))
+        expectation_value_N2 = np.dot(np.conj(g_state), np.dot(np.dot(N, N), g_state))
+        fluctuation_N = np.sqrt(expectation_value_N2 - expectation_value_N**2)
+        print(fluctuation_N)
+        return fluctuation_N
 
 
 x = ExactDiagonalization()
 x.M_sites = 3
 x.N_particles = 3
-x.get_eigenv()
+U_J = []
+fluctuations = []
+for i in range(1, 10):
+    x.J = i
+    U_J.append(x.U / x.J)
+    fluctuations.append(x.get_fluctuation_on_site())
+print("U_J: ", U_J)
+print("FLUCTUATIONS: ", fluctuations)
+plt.plot(U_J, fluctuations)
+plt.show()
