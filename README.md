@@ -1,5 +1,3 @@
-# QUANTUM METHOD METHODS
-
 # Quantum Numerical Methods Project
 
 ## Overview
