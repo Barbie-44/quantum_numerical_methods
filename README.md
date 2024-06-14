@@ -24,6 +24,7 @@ This project focuses on the implementation and analysis of various quantum numer
 
 The project directory is organized as follows:
 
+```
 quantum-numerical-methods/
 ├── README.md
 ├── HW_1/
@@ -39,6 +40,7 @@ quantum-numerical-methods/
 │ ├── dmrg.py
 │ └── gross_pitaevskii.py
 └── requirements.txt
+```
 
 ## Exact Diagonalization
 
