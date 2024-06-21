@@ -1,7 +1,6 @@
 import numpy as np
 from itertools import product
 import pandas as pd
-import math
 
 
 class CaldeiraLeggett:
@@ -32,6 +31,7 @@ class CaldeiraLeggett:
         basis = list(product(system_range, *reservoir_ranges))
         basis_arr = pd.DataFrame(basis, index=([i for i in range(len(basis))])).T
         basis_arr.index = [f"n{i}" for i in range(self.N_env + 1)]
+        print(basis_arr.T)
         return basis_arr.T
 
     def assign_functional_tag(self):
@@ -101,25 +101,11 @@ class CaldeiraLeggett:
         result = np.kron(np.identity(self.N_sys + 1), H_env)
         print(result)
         print(result.shape)
-    
-    def get_H_int(self):
-        
+
+    # def get_H_int(self):
 
 
 x = CaldeiraLeggett()
 x.N_env = 3
 x.N_sys = 1
 x.get_H_env()
-
-# def create_annihilate_operators(dim):
-#     a_dagger = np.diag(np.sqrt(np.arange(1, dim)), 1)
-#     a = a_dagger.T
-#     print(a_dagger)
-#     return a, a_dagger
-
-# a_bath = []
-# a_bath_dagger = []
-# for _ in range(3):  # Three bath oscillators
-#     a, a_dagger = create_annihilate_operators(10)
-#     a_bath.append(a)
-#     a_bath_dagger.append(a_dagger)
