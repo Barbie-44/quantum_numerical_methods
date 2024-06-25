@@ -133,5 +133,5 @@ class SpinChain:
 
 
 x = SpinChain()
-x.m = 2
+x.m = 2  # TODO I GOT THE ERROR CORE DUMPED. ASK FOR OTHER OPTIONS/POSSIBILITIES.
 x.construct_block_H()
