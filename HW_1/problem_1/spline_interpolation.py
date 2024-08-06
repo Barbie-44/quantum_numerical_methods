@@ -30,11 +30,6 @@ class LinearSpline(Coordinates):
         plt.show()
 
 
-# exercise_a = LinearSpline()
-# exercise_a.function = "a"
-# exercise_a.number_of_points = 32
-# exercise_a.end = np.pi
-# exercise_a.plot_linear_spline()
 
 
 # class CubicSpline(Spacing):

@@ -38,8 +38,4 @@ class PolynomialInterpolation(Coordinates):
         plt.show()
 
 
-exercise_a = PolynomialInterpolation()
-exercise_a.function = "a"
-exercise_a.number_of_points = 32
-exercise_a.end = np.pi
-exercise_a.plot_final_polynomial()
+

@@ -1,0 +1,7 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Bárbara"
+  given-names: "Bedolla"
+title: "Quantum numerial methods"
+url: "https://github.com/Barbie-44/quantum_numerical_methods"
