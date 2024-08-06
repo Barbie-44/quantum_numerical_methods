@@ -24,8 +24,8 @@ class ExactDiagonalization:
         self.T_tags = None
         self.ind = None
         self.T_sorted = None
-        self.J = None
-        self.U = 20
+        self.J = 20
+        self.U = None
 
     def get_arr_dimension(self):
         return math.factorial(self.N_particles + self.M_sites - 1) / (
@@ -50,7 +50,9 @@ class ExactDiagonalization:
             last_vector_copy.reverse()
             curr_k = (
                 len(last_vector)
-                - list(map(bool, last_vector_copy[1 : self.M_sites])).index(True)
+                - list(map(bool, last_vector_copy[1 : self.M_sites])).index(
+                    True
+                )
                 - 1
             )
 
@@ -106,7 +108,9 @@ class ExactDiagonalization:
         if i != j and state[j] != 0:
             state_copy.iloc[j] = state.iloc[j] - 1
             state_copy.iloc[i] = state.iloc[i] + 1
-            value = (-1) * self.J * (np.sqrt((state.iloc[i] + 1) * state.iloc[j]))
+            value = (
+                (-1) * self.J * (np.sqrt((state.iloc[i] + 1) * state.iloc[j]))
+            )
         return value, state_copy
 
     def get_H_kin(self):
@@ -167,7 +171,9 @@ class ExactDiagonalization:
         a_dagger = a.T
         N = np.dot(a_dagger, a)
         expectation_value_N = np.dot(np.conj(g_state), np.dot(N, g_state))
-        expectation_value_N2 = np.dot(np.conj(g_state), np.dot(np.dot(N, N), g_state))
+        expectation_value_N2 = np.dot(
+            np.conj(g_state), np.dot(np.dot(N, N), g_state)
+        )
         fluctuation_N = np.sqrt(expectation_value_N2 - expectation_value_N**2)
         print(fluctuation_N)
         return fluctuation_N
@@ -176,13 +182,17 @@ class ExactDiagonalization:
 x = ExactDiagonalization()
 x.M_sites = 3
 x.N_particles = 3
-U_J = []
+g = []
+g_inverse = []
 fluctuations = []
-for i in range(1, 10):
-    x.J = i
-    U_J.append(x.U / x.J)
+for i in range(1, 20):
+    x.U = i
+    g.append(x.J / x.U)
+    g_inverse.append(x.U / x.J)
     fluctuations.append(x.get_fluctuation_on_site())
-print("U_J: ", U_J)
+print("g: ", g)
 print("FLUCTUATIONS: ", fluctuations)
-plt.plot(U_J, fluctuations)
+plt.plot(g_inverse, fluctuations)
+plt.xlabel("g")
+plt.ylabel("Fluctuaciones")
 plt.show()

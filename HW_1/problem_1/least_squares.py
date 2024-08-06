@@ -52,10 +52,49 @@ class LeastSquares(Coordinates):
 
     def plot_final_graph(self):
         x = symbols("x")
+        self.number_of_points = 8
         linear_eq = self.get_final_function(x)
         print("LINEAR_EQ: ", linear_eq)
         f_xs = [linear_eq.subs(x, i) for i in self.x_coordinates]
         print("X's: ", self.x_coordinates)
         print("F(x)'s: ", f_xs)
-        plt.plot(self.x_coordinates, f_xs)
+        plt.plot(self.x_coordinates, f_xs, "r", label="8 puntos")
+
+        self.number_of_points = 16
+        linear_eq = self.get_final_function(x)
+        print("LINEAR_EQ: ", linear_eq)
+        f_xs = [linear_eq.subs(x, i) for i in self.x_coordinates]
+        print("X's: ", self.x_coordinates)
+        print("F(x)'s: ", f_xs)
+        plt.plot(self.x_coordinates, f_xs, "b", label="16 puntos")
+
+        self.number_of_points = 32
+        linear_eq = self.get_final_function(x)
+        print("LINEAR_EQ: ", linear_eq)
+        f_xs = [linear_eq.subs(x, i) for i in self.x_coordinates]
+        print("X's: ", self.x_coordinates)
+        print("F(x)'s: ", f_xs)
+        plt.plot(self.x_coordinates, f_xs, "g", label="32 puntos")
+
+        x = np.linspace(0, self.end, 400)
+        if self.function == "a":
+            plt.plot(
+                x,
+                2 * np.cos(x) + np.sin(2 * x) + np.sqrt(x),
+                "y",
+                label="función original",
+            )
+        else:
+            plt.plot(
+                x,
+                2 * np.cos(np.pi * x)
+                + np.sin(1 * np.pi * x)
+                + np.sqrt(np.pi * x),
+                "y",
+                label="función original",
+            )
+
+        plt.xlabel("x")
+        plt.ylabel("f(x)")
+        plt.legend()
         plt.show()

@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from HW_1.problem_1.commons import Coordinates
+import numpy as np
 
 
 class LinearSpline(Coordinates):
@@ -15,7 +16,8 @@ class LinearSpline(Coordinates):
             ) + x_coordinates[i]
             print("middle_x_distance: ", middle_x_distance)
             f_x = y_coordinates[i] + (
-                (y_coordinates[i + 1] - y_coordinates[i]) / x_coordinates[i + 1]
+                (y_coordinates[i + 1] - y_coordinates[i])
+                / x_coordinates[i + 1]
                 - x_coordinates[i]
             ) * (middle_x_distance - x_coordinates[i])
             final_x_coordinates.extend([x_coordinates[i], middle_x_distance])
@@ -24,13 +26,40 @@ class LinearSpline(Coordinates):
         print("Y's: ", final_y_coordinates)
         return final_x_coordinates, final_y_coordinates
 
-    def plot_linear_spline(self):
+    def get_linear_spline_arrays(self):
         x_array, y_array = self.get_linear_spline()
-        plt.plot(x_array, y_array)
+        return x_array, y_array
+
+    def convine_curves(self):
+        self.number_of_points = 8
+        x_arr, y_arr = self.get_linear_spline_arrays()
+        plt.plot(x_arr, y_arr, "r", label="8 puntos")
+        self.number_of_points = 16
+        x_arr, y_arr = self.get_linear_spline_arrays()
+        plt.plot(x_arr, y_arr, "b", label="16 puntos")
+
+        self.number_of_points = 32
+        x_arr, y_arr = self.get_linear_spline_arrays()
+        plt.plot(x_arr, y_arr, "g", label="32 puntos")
+
+        x = np.linspace(0, self.end, 400)
+        if self.function == "a":
+            plt.plot(
+                x,
+                2 * np.cos(x) + np.sin(2 * x) + np.sqrt(x),
+                "y",
+                label="función original",
+            )
+        else:
+            plt.plot(
+                x,
+                2 * np.cos(np.pi * x)
+                + np.sin(1 * np.pi * x)
+                + np.sqrt(np.pi * x),
+                "y",
+                label="función original",
+            )
+        plt.xlabel("x")
+        plt.ylabel("f(x)")
+        plt.legend()
         plt.show()
-
-
-
-
-# class CubicSpline(Spacing):
-#     pass
