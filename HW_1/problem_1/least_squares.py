@@ -21,13 +21,16 @@ class LeastSquares(Coordinates):
 
     def get_c_coefficients(self):
         x_coordinates, y_coordinates = self.set_coordinates(self.end)
-        polynomial_matrix = self.get_chevyshev_polynomials_matrix(x_coordinates)
+        polynomial_matrix = self.get_chevyshev_polynomials_matrix(
+            x_coordinates
+        )
         matrix_transpose = polynomial_matrix.transpose()
         matrix_multiplication = np.matmul(matrix_transpose, polynomial_matrix)
         invertible_matrix = np.linalg.inv(matrix_multiplication)
         print("INVERTIBLE_MATRIX: ", invertible_matrix)
         coefficients_array = np.matmul(
-            invertible_matrix, np.matmul(matrix_transpose, np.array(y_coordinates))
+            invertible_matrix,
+            np.matmul(matrix_transpose, np.array(y_coordinates)),
         )
         return coefficients_array
 
@@ -56,11 +59,3 @@ class LeastSquares(Coordinates):
         print("F(x)'s: ", f_xs)
         plt.plot(self.x_coordinates, f_xs)
         plt.show()
-
-
-exercise_a = LeastSquares()
-exercise_a.function = "a"
-exercise_a.number_of_points = 32
-exercise_a.end = np.pi
-exercise_a.regular_spacing = False
-exercise_a.plot_final_graph()
