@@ -1,23 +1,13 @@
+from sympy import exp, symbols, lambdify, sin, gamma
 import numpy as np
 import matplotlib.pyplot as plt
-from sympy import symbols, tanh, sinh, cosh, log, exp, sin, lambdify
 
 
-class TrapezoidalRule:
-    def __init__(self, point_a, point_b):
-        self.a = point_a
-        self.b = point_b
-
-
-class DERule(TrapezoidalRule):
-    """
-    NOTES:
-    - log(x) is base 10?
-    - Write explicitly the expression for each function.
-    """
+class MixedRule:
 
     def __init__(self, point_a, point_b, T, points, expected_value):
-        super().__init__(point_a, point_b)
+        self.a = point_a
+        self.b = point_b
         self.s = None  # Corresponds to current value of the integral
         self.curr_func = T
         self.N = points
@@ -31,27 +21,10 @@ class DERule(TrapezoidalRule):
         """
         return abs(self.tN - self.t0) / N
 
-    def apply_DErule(self):
-        """
-        Error calculation is pending
-        """
-        c = 1.0
+    def apply_mixed_rule(self):
         t = symbols("t")
-        if abs(self.a) == np.inf or abs(self.b) == np.inf:
-            """This rule is applied according to table 4.5.14"""
-            x = exp(2 * c * sinh(t))
-            dx_dt = 2 * c * cosh(t) * exp(2 * c * sinh(t))
-        else:
-            x = (1 / 2) * (
-                self.b + self.a + ((self.b - self.a) * tanh(c * sinh(t)))
-            )
-            dx_dt = (
-                (1 / 2)
-                * (self.b - self.a)
-                * (1 / (cosh(c * sinh(t))) ** 2)
-                * c
-                * cosh(t)
-            )
+        x = exp(t - exp(-t))
+        dx_dt = (1 + exp(-t)) * x
         f_x_t = self.curr_func(x)
         new_integrand = f_x_t * dx_dt
         print("NEW INTEGRAND: ", new_integrand)
@@ -63,7 +36,7 @@ class DERule(TrapezoidalRule):
         start = self.t0
         end = self.tN - h
         f_0 = f.evalf(subs={t: end})
-        f_N_1 = f.evalf(subs={t: 3})
+        f_N_1 = f.evalf(subs={t: self.tN})
         while start < end - h:
             f_i = f.evalf(subs={t: start + h})
             result += f_i
@@ -72,7 +45,7 @@ class DERule(TrapezoidalRule):
         return result
 
     def get_simpson_estimation(self):
-        f = self.apply_DErule()
+        f = self.apply_mixed_rule()
         h_N = self.get_optimal_h(self.N)
         S_N = self.apply_trapezoidal_rule(h_N, f)
         h_2N = self.get_optimal_h(2 * self.N)
@@ -145,29 +118,30 @@ class DERule(TrapezoidalRule):
         return N_values, error_values
 
 
-def func_4_5_15(x):
-    return log(x) * log(1 - x)
+def func_4_5_17(x):
+    return (x ** (-3 / 2)) * sin(x / 2) * exp(-x)
 
 
-# result = DERule(
+# result = MixedRule(
 #     point_a=0,
-#     point_b=1,
-#     T=func_4_5_15,
+#     point_b=np.inf,
+#     T=func_4_5_17,
 #     points=30,
-#     expected_value=2 - ((np.pi**2) / 6),
+#     expected_value=(np.pi * ((5 ** (1 / 2)) - 2)) ** (1 / 2),
 # )
-# result.plot_function(function=func_4_5_15, symbol="x", start=0, end=1)
-# new_integrand = result.apply_DErule()
+# result.plot_function(function=func_4_5_17, symbol="x", start=1, end=100)
+
+# new_integrand = result.apply_mixed_rule()
 # result.plot_function(
 #     function=new_integrand,
 #     symbol="t",
-#     start=-3,
-#     end=3,
+#     start=-4,
+#     end=4,
 #     values=None,
 #     new_interval=True,
 # )
-# result.t0 = -3
-# result.tN = 3
+# result.t0 = -4
+# result.tN = 4
 # N_values, error_values = result.get_error_deviation()
 # print(N_values, error_values)
 # result.plot_function(
@@ -179,29 +153,30 @@ def func_4_5_15(x):
 # )
 
 
-def func_4_5_16(x):
-    return 1 / (x ** (1 / 2) * (1 + x))
+def func_4_5_18(x):
+    return x ** (-2 / 7) * exp(-(x**2))
 
 
-result = DERule(
+result = MixedRule(
     point_a=0,
     point_b=np.inf,
-    T=func_4_5_16,
+    T=func_4_5_18,
     points=30,
-    expected_value=np.pi,
+    expected_value=(1 / 2) * gamma(5 / 14),
 )
-# result.plot_function(function=func_4_5_16, symbol="x", start=0, end=100)
-# new_integrand = result.apply_DErule()
+# result.plot_function(function=func_4_5_18, symbol="x", start=0, end=100)
+
+# new_integrand = result.apply_mixed_rule()
 # result.plot_function(
 #     function=new_integrand,
 #     symbol="t",
 #     start=-4,
-#     end=4,
+#     end=3,
 #     values=None,
 #     new_interval=True,
 # )
 result.t0 = -4
-result.tN = 4
+result.tN = 3
 N_values, error_values = result.get_error_deviation()
 print(N_values, error_values)
 result.plot_function(
