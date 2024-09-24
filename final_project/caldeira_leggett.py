@@ -29,7 +29,9 @@ class CaldeiraLeggett:
         bath_oscillators = [self.N_sys for item in range(self.N_env)]
         reservoir_ranges = [range(max_n + 1) for max_n in bath_oscillators]
         basis = list(product(system_range, *reservoir_ranges))
-        basis_arr = pd.DataFrame(basis, index=([i for i in range(len(basis))])).T
+        basis_arr = pd.DataFrame(
+            basis, index=([i for i in range(len(basis))])
+        ).T
         basis_arr.index = [f"n{i}" for i in range(self.N_env + 1)]
         print(basis_arr.T)
         return basis_arr.T
@@ -74,6 +76,7 @@ class CaldeiraLeggett:
         print(np.identity((self.N_sys + 1) ** self.N_env))
         env_dimension = (self.N_sys + 1) ** self.N_env
         result = np.kron(H_0, np.identity(env_dimension))
+        print("*" * 100)
         print(result)
         print(result.shape)
 
@@ -83,7 +86,9 @@ class CaldeiraLeggett:
         bath_oscillators = [self.N_sys for item in range(self.N_env - 1)]
         reservoir_ranges = [range(max_n + 1) for max_n in bath_oscillators]
         basis = list(product(system_range, *reservoir_ranges))
-        basis_arr = pd.DataFrame(basis, index=([i for i in range(len(basis))])).T
+        basis_arr = pd.DataFrame(
+            basis, index=([i for i in range(len(basis))])
+        ).T
         basis_arr.index = [f"n{i}" for i in range(self.N_env)]
         basis_arr = basis_arr.T
         print(basis_arr)
@@ -106,6 +111,6 @@ class CaldeiraLeggett:
 
 
 x = CaldeiraLeggett()
-x.N_env = 3
+x.N_env = 2
 x.N_sys = 1
 x.get_H_env()
